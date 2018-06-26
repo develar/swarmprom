@@ -8,7 +8,7 @@ networks:
 volumes:
     prometheus: {}
     grafana: {}
-    alertmanager: {}
+#    alertmanager: {}
 
 configs:
   caddy_config:
@@ -58,7 +58,7 @@ services:
           memory: 64M
 
   grafana:
-    image: stefanprodan/swarmprom-grafana:5.0.1
+    image: develar/grafana
     networks:
       - net
     environment:
@@ -86,30 +86,30 @@ services:
         reservations:
           memory: 64M
 
-  alertmanager:
-    image: stefanprodan/swarmprom-alertmanager:v0.14.0
-    networks:
-      - net
-    environment:
-      - SLACK_URL=${SLACK_URL:-https://hooks.slack.com/services/TOKEN}
-      - SLACK_CHANNEL=${SLACK_CHANNEL:-general}
-      - SLACK_USER=${SLACK_USER:-alertmanager}
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--storage.path=/alertmanager'
-    volumes:
-      - alertmanager:/alertmanager
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
+#  alertmanager:
+#    image: stefanprodan/swarmprom-alertmanager:v0.14.0
+#    networks:
+#      - net
+#    environment:
+#      - SLACK_URL=${SLACK_URL:-https://hooks.slack.com/services/TOKEN}
+#      - SLACK_CHANNEL=${SLACK_CHANNEL:-general}
+#      - SLACK_USER=${SLACK_USER:-alertmanager}
+#    command:
+#      - '--config.file=/etc/alertmanager/alertmanager.yml'
+#      - '--storage.path=/alertmanager'
+#    volumes:
+#      - alertmanager:/alertmanager
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      placement:
+#        constraints:
+#          - node.role == manager
+#      resources:
+#        limits:
+#          memory: 128M
+#        reservations:
+#          memory: 64M
 
   unsee:
     image: cloudflare/unsee:v0.8.0
@@ -150,7 +150,7 @@ services:
           memory: 64M
 
   prometheus:
-    image: stefanprodan/swarmprom-prometheus:v2.2.0-rc.0
+    image: develar/prometheus
     networks:
       - net
     command:
@@ -181,10 +181,12 @@ services:
   caddy:
     image: stefanprodan/caddy
     ports:
-      - "3000:3000"
       - "9090:9090"
       - "9093:9093"
       - "9094:9094"
+      - target: 3000
+        published: 3000
+        mode: host
     networks:
       - net
     environment:
